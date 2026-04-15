@@ -1,212 +1,149 @@
-# ⭐ Ultimate Magcubic Projector Rooting Guide
+# Magcubic HY300 Root
 
-### *(Magisk + HDMI-IN State Detection + IR Override + Debloat)*
+Rooting and firmware customization guide for Magcubic / HY300 Pro projectors, including Magisk integration, HDMI input state detection, IR remote override, and optional debloating.
 
-This document is a **complete step-by-step reference** for rooting Magcubic / HY300 Pro–type projectors, rebuilding the firmware, and installing Magisk modules to:
+## Overview
 
-* detect **HDMI-IN plug/unplug state**
-* auto-switch to HDMI
-* override IR remote keys (volume, power, etc.)
+This repository documents a complete workflow for rooting Magcubic / HY300 Pro–type projectors, rebuilding the firmware, and installing Magisk modules to:
 
-It lets you redo the whole procedure later **without guesswork**.
+- detect HDMI input plug/unplug events
+- automatically switch to HDMI input
+- override IR remote keys such as volume and power
 
----
+The goal is to keep a reproducible reference for rebuilding and restoring the setup later without trial and error.
 
-# 🚀 1. Requirements
+## Requirements
 
-* A **Magcubic / HY300 Pro-series projector (Allwinner / Sunxi)**
-* Windows or Linux PC with **ADB**
-* USB Debugging enabled
-* Original projector firmware dump (from the manufacturer)
-* **Magisk** installed after rooting
+- Magcubic / HY300 Pro projector (Allwinner / Sunxi platform)
+- Windows or Linux PC with ADB
+- USB debugging enabled
+- Original firmware image provided by the manufacturer
+- Magisk APK for post-flash installation
 
-> ⚠ NOTE: Rooting voids warranty. Do this at your own risk.
+> Rooting may void the device warranty and can permanently brick the device if performed incorrectly.
 
----
-
-# 🔧 2. Enable Developer Options
+## Enable Developer Options
 
 1. Open **Settings → About device**
 2. Tap **Build number** 7 times
-3. The **Developer options** menu appears
+3. The **Developer options** menu should appear
 
----
-
-# 🔌 3. Enable USB Debugging
+## Enable USB Debugging
 
 ```text
 Settings → System → Developer options → USB debugging
-```
+````
 
-Turn it ON and leave it enabled.
+Enable USB debugging and leave it turned on during the procedure.
 
----
+## Firmware extraction and patching
 
-# 📦 4. Get, Extract and Patch the Firmware
+### 1. Obtain the original firmware
 
----
+Request the full firmware package from the manufacturer.
+It is typically provided as an `.img` file.
 
-## 4.1. Get the original firmware
+### 2. Extract `boot.fex`
 
-1. **Contact the projector manufacturer** and request the full firmware.
-2. You should receive a **firmware file** (or package containing it) - most likely a **`.img` file**.
+Use `imagewty-tool` to unpack the firmware image.
 
----
+* On Windows, run it through WSL if needed
+* Extract the `.img` file
+* The tool should generate a folder ending in `.dmp`
+* Inside the extracted dump, locate `boot.fex`
 
-## 4.2. Extract `boot.fex` from the `.dmp`
+### 3. Download Magisk
 
-Use **imagewty-tool**:
+Download the official Magisk APK and keep it for later installation on the projector.
 
-> [https://github.com/uictorius/imagewty-tool/releases/download/v1.0.0/imagewty-tool-1.0.0-x86_64.zip](https://github.com/uictorius/imagewty-tool/releases/download/v1.0.0/imagewty-tool-1.0.0-x86_64.zip)
+### 4. Patch `boot.fex`
 
-* If you are on **Windows**, run this **via WSL (Linux subsystem)**.
-* Use `imagewty-tool` on the firmware **`.img` file**.
-* The tool will **create a folder ending by `.dmp`** 
-* Inside this extracted folder, locate **`boot.fex`**.
+Patch the extracted `boot.fex` using a compatible Magisk patching workflow.
 
----
+Recommended patching steps:
 
-## 4.3. Download Magisk APK
+1. Select the extracted `boot.fex`
+2. Enable all relevant options except `recovery`
+3. Run the patching process
+4. Download the patched output
+5. Rename the patched file back to `boot.fex`
+6. Replace the original `boot.fex` inside the extracted `.dmp` directory
 
-Download the official Magisk APK here:
+### 5. Repack the rooted firmware
 
-> [https://github.com/topjohnwu/Magisk/releases](https://github.com/topjohnwu/Magisk/releases)
-
-Keep it for later installation on the projector, and also for patching if needed.
-
----
-
-## 4.4. Patch `boot.fex` with Magisk Patcher
-
-Use the online Magisk patcher you specified:
-
-> [https://circlecashteam.github.io/MagiskPatcher/](https://circlecashteam.github.io/MagiskPatcher/)
-
-Steps:
-
-1. Select your extracted **`boot.fex`**.
-2. Enable **all options except *recovery*** (as you wrote: “toutes les options sauf recovery”).
-3. Let the tool patch the file.
-4. Download the patched file.
-5. **Rename it to `boot.fex`** again.
-6. **Overwrite** the original `boot.fex` in the extracted `.dmp` folder (i.e. replace the stock boot with the Magisk-patched one).
-
----
-
-## 4.5. Repack the `.dmp` into a rooted image
-
-From that modified dump:
-
-* **Repack the `.dmp` with imagewty-tool to create**:
+Rebuild the modified dump into a new rooted firmware image, for example:
 
 ```text
 update_rooted.img
 ```
 
-This `update_rooted.img` is the **new rooted firmware image** that you will flash with PhoenixSuit.
+This rebuilt image will be flashed with PhoenixSuit.
 
----
+## Windows setup: PhoenixSuit driver installation
 
-# 🧰 5. Windows: Disable Core Isolation & Install PhoenixSuit Driver
+1. Disable **Windows Defender Core Isolation** if unsigned USB drivers fail to install
+2. Install the PhoenixSuit drivers
+3. Open **Device Manager** and verify that the device is recognized correctly
 
-1. **Disable Windows Defender Core Isolation**
-   (Otherwise the unsigned USB driver may fail to install.)
+If the driver is not installed properly:
 
-2. Download PhoenixSuit 1.19 : https://androiddatahost.com/uj9da
+* right-click the device
+* choose **Update driver**
+* select **Browse my computer for drivers**
+* point to the PhoenixSuit driver directory
 
-3. Run the driver installer:
+The device should appear without any warning icon.
 
-   ```text
-   PhoenixSuit_V1.19\Drivers\DPInst64.exe
-   ```
+## Enter FEL mode
 
-4. Open **Device Manager** and check the device:
+Use the following sequence to put the projector into FEL mode:
 
-   * If the driver is **not** correctly installed:
+1. Power off the projector
+2. Unplug USB
+3. Unplug power
+4. Hold the **Power** button on the remote for about 5 seconds
+5. While still holding it, plug the USB cable into the PC
+6. Wait about 10 seconds
+7. Plug in the power adapter
+8. Wait a few seconds for the projector to power on
+9. Release the power button
 
-     * Right-click the device → **Update driver**
-     * Choose “Browse my computer for drivers”
-     * Point it to: `PhoenixSuit_V1.19\Drivers`
-   * The driver **must not show any error icon**.
+At this point, the PC should detect the projector in FEL mode.
 
----
-
-# ⚡ 6. Put the Projector into FEL Mode (Flash Mode)
-
-Exact sequence :
-
-1. **Turn everything off:**
-
-   * Power off the projector
-   * Unplug **USB**
-   * Unplug **power**
-
-2. On the projector remote:
-
-   * Press and hold the **Power button for 5 seconds**
-
-3. While still holding the button:
-
-   * Plug in the **USB cable** to the PC
-
-4. Wait **10 seconds**
-
-5. Plug in the **power adapter**
-
-6. Wait **about 5 seconds**
-   → the projector should power on automatically
-
-7. Now **release** the Power button
-
-At this point the PC should detect the projector in **FEL mode**.
-
----
-
-# 🔥 7. Flash `update_rooted.img` with PhoenixSuit
+## Flash the rooted image
 
 1. Launch **PhoenixSuit**
-2. Select the **disk image**: `update_rooted.img`
+2. Select the rebuilt image: `update_rooted.img`
 3. Start the flashing process
 
-When it finishes and the device reboots:
+Once flashing completes and the projector reboots, the patched boot image should be installed.
 
-> ✅ **The projector is now rooted.**
-> (Boot image is Magisk-patched.)
+## Finish Magisk setup
 
----
+1. Install or open the **Magisk APK** on the projector
+2. Let Magisk complete its initial setup
+3. Reboot if requested
 
-# 📱 8. Finish Magisk Setup on the Projector
+Root access should now be fully operational.
 
-1. Install / open the **Magisk APK** on the projector.
-2. Let Magisk do its **initial setup / installation**.
-3. Reboot when it asks you to.
+## Install Magisk modules
 
-Magisk root is now **fully operational on the projector**.
+Custom Magisk modules can be used to extend the projector behavior, for example:
 
----
+* detect HDMI input state changes
+* automatically switch to HDMI input
+* intercept IR remote commands such as power and volume
+* forward IR actions to an external device such as a Fire Stick
+* block unwanted hosts or services
 
-# 🧩 9. Install Magisk Modules (HDMI + IR override)
+This allows a simplified setup where one remote can control both the projector and the connected HDMI device.
 
-1. **Install the attached Magisk modules if you want Android TV**
-2. You can add your own extra modules.
-   For example, you can have a module that:
-   * **Automatically switches to HDMI** input
-   * **Intercepts IR remote commands** (volume, power)
-   * Forwards those IR actions to a **Fire Stick**, so you no longer need the projector’s own remote.
-   * Block chinese hosts
+## Result
 
-Result: one remote to control everything (projector power/volume + Fire Stick).
+After completing the process, the projector is:
 
-
-
----
-
-# 🏁 DONE
-
-Your Magcubic / HY300 Pro-type projector is now:
-
-* ✔ Rooted (Magisk-patched `boot.fex`)
-* ✔ Magisk fully installed
-* ✔ HDMI-IN state detectable
-* ✔ Ready for **auto-HDMI** behavior
-* ✔ IR keys can be overridden (e.g. for Fire Stick control)
+* rooted with a Magisk-patched `boot.fex`
+* configured for Magisk module support
+* able to detect HDMI input state changes
+* ready for automatic HDMI switching
+* capable of IR key override for custom remote behavior
